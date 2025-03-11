@@ -11,9 +11,10 @@ import imrc_logo from'./assets/imrc_logo.png'
 // API
 import { TerraformAPI, AnsibleAPI, BackendAPI } from './axios';
 
-// Monitoring
-import Monitoring from "./Monitoring";
-
+// Page
+import Monitoring from "./Pages/Monitoring";
+import Sync from "./Pages/Sync";
+import None from "./Pages/Default"
 
 //!! MODAL UPLOAD
 //!! Terraform upload config (1)
@@ -692,6 +693,8 @@ async function GetConfigInfo (){
 
 function App() {
   const [configStat,setConfigStat] = useState(false); 
+  const [activeMenu, setActiveMenu] = useState("none");
+
 
   //! ambil 
   useEffect(()=>{
@@ -732,6 +735,7 @@ function App() {
   const [modalShow, setModalShow] = useState(false);
 
   return (  
+  // Menu
     <>
       <div className="container-fluid no-gutter" style={{ display: 'flex' }}>
         <div className='row' style={{ flex: 1 }}>
@@ -749,8 +753,9 @@ function App() {
               </a>
               <hr className='text-secondary'/>
               <ul className="nav nav-pills flex-column">
-                  <li className="nav-item text-dark fs-4 my-1 item-menu active">
-                    <a href="#" className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
+                  {/* Monitoring cluster */}
+                  <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "monitoring" ? "active" : ""}`}>
+                    <a onClick={() => setActiveMenu("monitoring")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
                       <div className='d-flex'>
                         <div style={{fontSize:"2rem"}}>
                           <i className='bi-diagram-3-fill'></i>
@@ -761,6 +766,21 @@ function App() {
                       </div>
                     </a>
                   </li>
+                  {/* Syncronizer */}
+                  <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "sync" ? "active" : ""}`}>
+                    <a onClick={() => setActiveMenu("sync")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
+                      <div className='d-flex'>
+                        <div style={{fontSize:"2rem"}}>
+                          <i className=' bi bi-cloud-upload-fill'></i>
+                        </div>
+                        <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
+                          <b>Synchronizer</b>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <hr />
+                  {/* Upload config */}
                   <li className="nav-item text-dark fs-4 my-1 item-menu">
                     <a onClick={() => setModalShow(true)} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
                       <div className='d-flex'>
@@ -773,7 +793,7 @@ function App() {
                       </div>
                     </a>
                   </li>
-                  <hr />
+                  {/* Download Config */}
                   <li className="nav-item text-dark fs-4 my-1 item-menu">
                     <a className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page" onClick={downloadConfig}>
                       <div className='d-flex'>
@@ -790,8 +810,9 @@ function App() {
             </div>
           </div>
         </div>
+        {/* bagian putih */}
         <div className='monitoring_sec' style={{ flex: 5, paddingLeft:"1rem", marginTop:"2rem", paddingRight:"1rem"}}>
-          {configStat === false?(
+          {/* {configStat === false?(
             <div className='noCluster'>
               <div className='noClusterText'>
                     No Kubernetes Cluster
@@ -799,7 +820,12 @@ function App() {
             </div>
           ):(
             <Monitoring></Monitoring>
-          )}
+          )} */}
+
+          {/* Render konten tergantung activeMenu */}
+          {activeMenu === "none" && <None />}
+          {activeMenu === "monitoring" && <Monitoring />}
+          {activeMenu === "sync" && <Sync />}
         </div>
       </div>
 

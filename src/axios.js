@@ -11,7 +11,7 @@ const AnsibleAPI = axios.create({
 });
 
 const BackendAPI = axios.create({
-    // baseURL: 'http://localhost:8003'
+    baseURL: 'http://localhost:8003'
 });
 
 export { TerraformAPI, AnsibleAPI, BackendAPI};

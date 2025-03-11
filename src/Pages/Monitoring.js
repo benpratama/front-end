@@ -1,7 +1,7 @@
 import { useState, useRef,useEffect  } from 'react';
-import { BackendAPI } from './axios';
+import { BackendAPI } from '../axios';
 
-import './App.css';
+import '../App.css';
 
 //! === BACKEND API ===
 async function GetClusterData (){

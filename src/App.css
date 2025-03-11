@@ -100,6 +100,11 @@
   font-size: 1.2rem;
   font-weight: bold;
 }
+.nowrap{
+  white-space: nowrap;
+  margin-right: 3rem;
+  margin-bottom: 1rem;
+}
 
 .k8s_cluster_box{
   border: solid 1px;
@@ -179,4 +184,24 @@
   font-size: 3rem;
   text-align: center;
   font-weight: bold;
+}
+
+.dockerfile{
+  padding-top: 3rem;  
+}
+
+.hrborder{
+  border-top: 0.2rem dashed red;
+}
+
+.hrborder2{
+  border: 0;
+  border-top: 0.2rem solid; /* Warna akan ditentukan dari border-image */
+  border-image: repeating-linear-gradient(
+    to right,
+    green 0,
+    green 10px,        /* Panjang dash */
+    transparent 10px,
+    transparent 30px /* Jarak antara dash */
+  ) 1;
 }
