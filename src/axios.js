@@ -1,13 +1,18 @@
 import axios from 'axios';
 
-// Instance for API 1
+//server gede
 const TerraformAPI = axios.create({
-    // baseURL: 'http://140.116.234.116:9711'
+    baseURL: 'http://140.116.234.100:23631'
 });
+
+//local
+// const TerraformAPI = axios.create({
+//     baseURL: 'http://localhost:8001'
+// });
 
 // Instance for API 2
 const AnsibleAPI = axios.create({
-    // baseURL: 'http://140.116.234.116:1092'
+    baseURL: 'http://140.116.234.100:10921'
 });
 
 const BackendAPI = axios.create({

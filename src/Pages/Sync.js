@@ -15,7 +15,7 @@ const Sync = ()=>{
         <>
             {/* JUDUL */}
             <div className='row'>
-                <div className='box_head_title p_center'>
+                <div className='box_head_title p_center' style={{fontSize:"3rem"}}>
                   <span>Dockerfile & Manufacturing Service</span>
                 </div>
             </div>
@@ -24,7 +24,7 @@ const Sync = ()=>{
             <div className="top-section">
                 <div className='row my-4 '>
                     <div className="col-md-6 d-flex justify-content-center align-items-center">
-                        <span className="sub_title nowrap" style={{fontSize:"2rem"}}>Select Project</span>
+                        <span className="sub_title nowrap" style={{fontSize:"1.5rem"}}>Select Project</span>
                         <div className="input-group mb-3">
                             
                             <select className="form-select" id="project"
@@ -43,7 +43,7 @@ const Sync = ()=>{
             <hr className='hrborder'/>
 
             {/* SECTION */}
-            <div className='row' style={{border:"5px solid black"}}>
+            <div className='row'>
                 {activeSection === "none" && <Default />}
                 {activeSection === "IPM" && <IPM />}
                 {activeSection === "AVM" && <AVM />}

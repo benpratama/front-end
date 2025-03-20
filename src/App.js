@@ -23,18 +23,15 @@ function MyVerticallyCenteredModal(props) {
   const UploadConfig = "/terraform/tmain/upload"
   
   const [file, setFile] = useState(null);
+  const [schemaError, setSchemaError] = useState(false);
   const fileInputRef = useRef(null)
+  
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
 };
 
   const uploadConfig = async ()=>{
-    if (!file) {
-      alert('Please select a file first.');
-      return;
-    }
-
     const formData = new FormData();
     formData.append('file', file); // Make sure 'file' aligns with what your server expects
 
@@ -43,35 +40,29 @@ function MyVerticallyCenteredModal(props) {
         UploadConfig, formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
-      props.onHide(); // Close modal on successful upload
+      
       if (response.data.status==="success") {
-        await delay(5000) 
-        console.log("Start createing cluster "+ new Date());
-        await TerrafromCreateMain(response.data.newResources);
-        console.log("Cluster finished "+ new Date());
-      }
-      // props.onHide(); // Close modal on successful upload
-    } catch (error) {
-      console.error("Error in TerraformCommandApply:", error);
-    }
+        props.onHide(); // Close modal on successful upload
+        await delay(5000)
 
-    // TerraformAPI.post(UploadConfig, formData, {
-    //     headers: {
-    //         'Content-Type': 'multipart/form-data'
-    //     }
-    // })
-    // .then(response => {
-    //     // console.log('File uploaded successfully', response.data);
-    //     if (response.data.status==="success") {
-    //       TerrafromCreateMain(response.data.newResources)
-    //     }
-    //     props.onHide(); // Close modal on successful upload
-    // })
-    // .catch(error => {
-    //     console.error('Error uploading file:', error);
-    // });
+        console.log("Start createing cluster "+ new Date());
+        await TerrafromCreateMain(response.data.newResources);//untuk jalanin next api
+        console.log("Cluster finished "+ new Date());
+        setSchemaError(false);
+      } else {
+        setSchemaError(true);
+      }
+    } catch (error) {
+    }
   }
 
+  const handleClose = () => {
+    // Reset error agar hilang ketika modal ditutup
+    setSchemaError(false);
+    // Panggil fungsi penutup modal (jika ada)
+    props.onHide?.();
+  };
+  
   return (
     <Modal
       {...props}
@@ -79,12 +70,31 @@ function MyVerticallyCenteredModal(props) {
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title id="contained-modal-title-vcenter">
-          Upload Cluster Configuration FIle
+          Upload Cluster JSON File
         </Modal.Title>
+        <button
+              type="button"
+              className="btn-close"
+              onClick={handleClose}
+            ></button>
       </Modal.Header>
       <Modal.Body>
+        {schemaError && (
+            <div
+              className="modal-body d-flex justify-content-center align-items-center"
+              style={{
+                height: "15px",
+                background: "#FF4545",
+                marginBottom: "0.5rem",
+                fontSize: "25px",
+                fontWeight: "bold",
+              }}
+            >
+              JSON does not match schema
+            </div>
+          )}
         <div className='d-flex justify-content-between'>
           <div className='ms-2 my-2'>
             <b>Clsuter Config File</b>
@@ -135,21 +145,6 @@ async function TerrafromCreateMain(newResources){
   } catch (error) {
     console.error("Error in TerraformCommandApply:", error);
   }
-
-  // TerraformAPI.post(
-  //   TMainAdd, //! endponint
-  //   JSON.stringify({ newResources}), //! data diubah jadi bentuk json object
-  //   {
-  //     headers: {
-  //       'Content-Type': 'application/json', //! data yang dikirim bentuk json
-  //     },
-  //   }
-  // ).then(response => {
-  //   if (response.data.status==="success") {
-  //     var infoHost = response.data.infoHost
-  //     TerraformCommandApply(newResources,infoHost)
-  //   }
-  // })
 }
 
 //!! Terraform exe main (3)
@@ -754,7 +749,7 @@ function App() {
               <hr className='text-secondary'/>
               <ul className="nav nav-pills flex-column">
                   {/* Monitoring cluster */}
-                  <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "monitoring" ? "active" : ""}`}>
+                  {/* <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "monitoring" ? "active" : ""}`}>
                     <a onClick={() => setActiveMenu("monitoring")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
                       <div className='d-flex'>
                         <div style={{fontSize:"2rem"}}>
@@ -765,21 +760,21 @@ function App() {
                         </div>
                       </div>
                     </a>
-                  </li>
+                  </li> */}
                   {/* Syncronizer */}
-                  <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "sync" ? "active" : ""}`}>
+                  {/* <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "sync" ? "active" : ""}`}>
                     <a onClick={() => setActiveMenu("sync")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
                       <div className='d-flex'>
                         <div style={{fontSize:"2rem"}}>
-                          <i className=' bi bi-cloud-upload-fill'></i>
+                          <i className=' bi bi bi-arrow-repeat'></i>
                         </div>
                         <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
                           <b>Synchronizer</b>
                         </div>
                       </div>
                     </a>
-                  </li>
-                  <hr />
+                  </li> */}
+                  {/* <hr /> */}
                   {/* Upload config */}
                   <li className="nav-item text-dark fs-4 my-1 item-menu">
                     <a onClick={() => setModalShow(true)} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">

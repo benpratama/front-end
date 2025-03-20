@@ -5,7 +5,7 @@ const Default = ()=>{
     return(
         <div className='noCluster'>
             <div className='noClusterText'>
-                Selamat datang
+                Welcome! Please select a menu to get started
             </div>
         </div>
     )

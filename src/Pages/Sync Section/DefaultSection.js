@@ -4,8 +4,8 @@ import '../../App.css';
 const DefaultSection = ()=>{
     return(
         <div className='noCluster'>
-            <div className='noClusterText'>
-                PILIH DULU ANJIR
+            <div className='noClusterText' style={{fontSize:"2.5rem"}}>
+                Please select a project to continue
             </div>
         </div>
     )
