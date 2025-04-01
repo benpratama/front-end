@@ -15,6 +15,8 @@ import { TerraformAPI, AnsibleAPI, BackendAPI } from './axios';
 import Monitoring from "./Pages/Monitoring";
 import Sync from "./Pages/Sync";
 import None from "./Pages/Default"
+import BuildK8s from "./Pages/Buildk8s"
+import VMManager from "./Pages/VMmanager"
 
 //!! MODAL UPLOAD
 //!! Terraform upload config (1)
@@ -729,84 +731,141 @@ function App() {
 
   const [modalShow, setModalShow] = useState(false);
 
-  return (  
-  // Menu
+  // ini sidebar
+  // return (  
+  // // Menu
+  //   <>
+  //     <div className="container-fluid no-gutter" style={{ display: 'flex' }}>
+  //       <div className='row' style={{ flex: 1 }}>
+  //         <div className='col-auto min-vh-100 d-felx justify-content-between flex-column sidebar' >
+  //           <div>
+  //             <a className='text-decoration-none text-dark d-felx align-itemcenter ms-3 mt-2'>
+  //               <div className='d-flex ms-2'>
+  //                 <div>
+  //                   <img src={imrc_logo} alt="logo-IM"/>
+  //                 </div>
+  //                 <div className='mt-2 ms-3'>
+  //                   <span className='title' style={{fontSize:"2.5rem", fontWeight:"bold"}}>iMRC</span>
+  //                 </div>
+  //               </div>
+  //             </a>
+  //             <hr className='text-secondary'/>
+  //             <ul className="nav nav-pills flex-column">
+  //                 {/* Monitoring cluster */}
+  //                 {/* <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "monitoring" ? "active" : ""}`}>
+  //                   <a onClick={() => setActiveMenu("monitoring")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
+  //                     <div className='d-flex'>
+  //                       <div style={{fontSize:"2rem"}}>
+  //                         <i className='bi-diagram-3-fill'></i>
+  //                       </div>
+  //                       <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
+  //                         <b>Monitoring Cluster</b>
+  //                       </div>
+  //                     </div>
+  //                   </a>
+  //                 </li> */}
+  //                 {/* Syncronizer */}
+  //                 {/* <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "sync" ? "active" : ""}`}>
+  //                   <a onClick={() => setActiveMenu("sync")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
+  //                     <div className='d-flex'>
+  //                       <div style={{fontSize:"2rem"}}>
+  //                         <i className=' bi bi bi-arrow-repeat'></i>
+  //                       </div>
+  //                       <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
+  //                         <b>Synchronizer</b>
+  //                       </div>
+  //                     </div>
+  //                   </a>
+  //                 </li> */}
+  //                 {/* <hr /> */}
+  //                 {/* Upload config */}
+  //                 <li className="nav-item text-dark fs-4 my-1 item-menu">
+  //                   <a onClick={() => setModalShow(true)} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
+  //                     <div className='d-flex'>
+  //                       <div style={{fontSize:"2rem"}}>
+  //                         <i className=' bi bi-cloud-upload-fill'></i>
+  //                       </div>
+  //                       <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
+  //                         <b>Upload Config</b>
+  //                       </div>
+  //                     </div>
+  //                   </a>
+  //                 </li>
+  //                 {/* Download Config */}
+  //                 <li className="nav-item text-dark fs-4 my-1 item-menu">
+  //                   <a className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page" onClick={downloadConfig}>
+  //                     <div className='d-flex'>
+  //                       <div style={{fontSize:"2rem"}}>
+  //                         <i className='bi bi-cloud-download-fill'></i>
+  //                       </div>
+  //                       <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
+  //                         <b>Download Config</b>
+  //                       </div>
+  //                     </div>
+  //                   </a>
+  //                 </li>
+  //             </ul>
+  //           </div>
+  //         </div>
+  //       </div>
+  //       {/* bagian putih */}
+  //       <div className='monitoring_sec' style={{ flex: 5, paddingLeft:"1rem", marginTop:"2rem", paddingRight:"1rem"}}>
+  //         {/* {configStat === false?(
+  //           <div className='noCluster'>
+  //             <div className='noClusterText'>
+  //                   No Kubernetes Cluster
+  //               </div>
+  //           </div>
+  //         ):(
+  //           <Monitoring></Monitoring>
+  //         )} */}
+
+  //         {/* Render konten tergantung activeMenu */}
+  //         {activeMenu === "none" && <None />}
+  //         {activeMenu === "monitoring" && <Monitoring />}
+  //         {activeMenu === "sync" && <Sync />}
+  //       </div>
+  //     </div>
+
+  //     <MyVerticallyCenteredModal
+  //       show={modalShow}
+  //       onHide={() => setModalShow(false)}
+  //     />
+  //   </>
+    
+  // );
+
+  //ini navbar
+  return(
     <>
-      <div className="container-fluid no-gutter" style={{ display: 'flex' }}>
-        <div className='row' style={{ flex: 1 }}>
-          <div className='col-auto min-vh-100 d-felx justify-content-between flex-column sidebar' >
+      <nav className="navbar navbar-expand-lg navbar-light" style={{background:" #e3f2fd",padding:"0rem"}}>
+        <div className="container-fluid">
+          {/* logo */}
+          <div className='d-flex ms-2 navbar-brand'>
             <div>
-              <a className='text-decoration-none text-dark d-felx align-itemcenter ms-3 mt-2'>
-                <div className='d-flex ms-2'>
-                  <div>
-                    <img src={imrc_logo} alt="logo-IM"/>
-                  </div>
-                  <div className='mt-2 ms-3'>
-                    <span className='title' style={{fontSize:"2.5rem", fontWeight:"bold"}}>iMRC</span>
-                  </div>
-                </div>
-              </a>
-              <hr className='text-secondary'/>
-              <ul className="nav nav-pills flex-column">
-                  {/* Monitoring cluster */}
-                  {/* <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "monitoring" ? "active" : ""}`}>
-                    <a onClick={() => setActiveMenu("monitoring")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
-                      <div className='d-flex'>
-                        <div style={{fontSize:"2rem"}}>
-                          <i className='bi-diagram-3-fill'></i>
-                        </div>
-                        <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
-                          <b>Monitoring Cluster</b>
-                        </div>
-                      </div>
-                    </a>
-                  </li> */}
-                  {/* Syncronizer */}
-                  {/* <li className={`nav-item text-dark fs-4 my-1 item-menu ${activeMenu === "sync" ? "active" : ""}`}>
-                    <a onClick={() => setActiveMenu("sync")} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
-                      <div className='d-flex'>
-                        <div style={{fontSize:"2rem"}}>
-                          <i className=' bi bi bi-arrow-repeat'></i>
-                        </div>
-                        <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
-                          <b>Synchronizer</b>
-                        </div>
-                      </div>
-                    </a>
-                  </li> */}
-                  {/* <hr /> */}
-                  {/* Upload config */}
-                  <li className="nav-item text-dark fs-4 my-1 item-menu">
-                    <a onClick={() => setModalShow(true)} className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page">
-                      <div className='d-flex'>
-                        <div style={{fontSize:"2rem"}}>
-                          <i className=' bi bi-cloud-upload-fill'></i>
-                        </div>
-                        <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
-                          <b>Upload Config</b>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-                  {/* Download Config */}
-                  <li className="nav-item text-dark fs-4 my-1 item-menu">
-                    <a className="nav-link text-dark" style={{fontSize:"1.7rem"}} aria-current="page" onClick={downloadConfig}>
-                      <div className='d-flex'>
-                        <div style={{fontSize:"2rem"}}>
-                          <i className='bi bi-cloud-download-fill'></i>
-                        </div>
-                        <div className='ms-3' style={{fontSize:"1.1rem", marginTop:"0.5rem"}}>
-                          <b>Download Config</b>
-                        </div>
-                      </div>
-                    </a>
-                  </li>
-              </ul>
+              <img src={imrc_logo} alt="logo-IM" style={{ width: "4rem", height: "auto" }}/>
+            </div>
+            <div className='mt-2'>
+              <span className='title' style={{fontSize:"1.5rem", fontWeight:"bold"}}>iMRC</span>
             </div>
           </div>
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+              <li className="nav-item" style={{fontSize:"1.5rem", }}>
+                <a className="nav-link active" aria-current="page"  href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("vmManager")}>VM Manager</a>
+              </li>
+              {/* <li className="nav-item" style={{fontSize:"1.5rem", }}>
+                <a className="nav-link active" aria-current="page" href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("buildK8s")}>Build K8s</a>
+              </li> */}
+            </ul>
+          </div>
         </div>
-        {/* bagian putih */}
-        <div className='monitoring_sec' style={{ flex: 5, paddingLeft:"1rem", marginTop:"2rem", paddingRight:"1rem"}}>
+      </nav>
+
+      <div className='monitoring_sec' style={{ flex: 5, paddingLeft:"1rem", marginTop:".5rem", paddingRight:"1rem"}}>
           {/* {configStat === false?(
             <div className='noCluster'>
               <div className='noClusterText'>
@@ -821,16 +880,11 @@ function App() {
           {activeMenu === "none" && <None />}
           {activeMenu === "monitoring" && <Monitoring />}
           {activeMenu === "sync" && <Sync />}
+          {/* {activeMenu === "buildK8s" && <BuildK8s />} */}
+          {activeMenu === "vmManager" && <VMManager />}
         </div>
-      </div>
-
-      <MyVerticallyCenteredModal
-        show={modalShow}
-        onHide={() => setModalShow(false)}
-      />
     </>
-    
-  );
+  )
 }
 
 export default App;

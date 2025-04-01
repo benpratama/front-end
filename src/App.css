@@ -39,7 +39,11 @@
 
 /* ------- */
 .nav-item a:hover {
-  background-color: #19A7CE;
+  /* sidebar */
+  /* background-color: #19A7CE; */
+
+  /* navbar */
+  background-color: #77CDFF;
 }
 .active {
   background-color: #19A7CE;
@@ -204,4 +208,37 @@
     transparent 10px,
     transparent 30px /* Jarak antara dash */
   ) 1;
+}
+.form-label{
+  padding-right: .2rem;
+  color: blue;
+  font-weight:500;
+  font-size: 1.2rem;
+}
+
+.vm-label{
+  padding-right: .2rem;
+  color: blue;
+  font-weight:600;
+  /* font-size: 1.1rem; */
+}
+
+/* VM deployment log */
+.row-start {
+  background-color: #dbeafe; /* Biru muda */
+}
+
+.row-process {
+  background-color: #fef9c3; /* Kuning muda */
+}
+
+.row-finished {
+  background-color: #dcfce7; /* Hijau muda */
+}
+
+.row-error{
+  background-color: #fcdcdc;
+}
+.table-brdr{
+  border: 2px solid black;
 }

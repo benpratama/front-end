@@ -12,7 +12,8 @@ const TerraformAPI = axios.create({
 
 // Instance for API 2
 const AnsibleAPI = axios.create({
-    baseURL: 'http://140.116.234.100:10921'
+    baseURL: 'http://140.116.234.100:10921',
+    timeout: 600000
 });
 
 const BackendAPI = axios.create({
