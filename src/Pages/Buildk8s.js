@@ -107,8 +107,24 @@ async function TerrafromCreateMain(newResources){
       );
       if (response.data.status==="success") {
         console.log("==End== create Main.tf "+ new Date());
+        console.log('TerrafromCreateMain')
         await delay(8000) 
         var infoHost = response.data.infoHost;
+
+        // console.log(infoHost)
+        // {
+        //   "ConrolPlane": {
+        //       "role": "ControlPlane",
+        //       "os": "ubuntu",
+        //       "ip": "192.168.3.211"
+        //   },
+        //   "WorkerNode1": {
+        //       "role": "WorkerNode",
+        //       "os": "windows",
+        //       "ip": "192.168.3.212"
+        //   }
+        // }
+        
         await TerraformCommandApply(newResources, infoHost);
       }
     } catch (error) {
@@ -701,6 +717,10 @@ function BuildK8s (){
             if (response.data.status === "success") { // Tutup modal jika upload sukses
               await delay(5000);
               console.log("Start creating cluster " + new Date());
+
+              // console.log(response.data.newResources)
+              // ['ConrolPlane', 'WorkerNode1']
+
               await TerrafromCreateMain(response.data.newResources); // Panggil API selanjutnya
               console.log("Cluster finished " + new Date());
             //   setSchemaError(false);

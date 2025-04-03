@@ -110,6 +110,24 @@ async function writeLog(msg,status) {
     }
 }
 
+//!! FUNCTION BACKEND (GET LOG)
+async function GetDeploymentLog() {
+  const endpoint = '/vmmanager/data';
+  try {
+    const response = await BackendAPI.get(endpoint, {
+      headers: {
+        'Content-Type': 'application/json', 
+      },
+    });
+
+  //   console.log(response.data); // untuk cek response
+    return response.data;
+  } catch (error) {
+    console.error("Error in GetDeploymentLog:", error);
+    return { stat: 'failed', data: [] }; // fallback
+  }
+}
+
 //!! FUNCTION BACKEND (WRITE VIRTUAL MACHINES)
 async function addVM(vms) {
     const endpoint = "/vmmanager/add";
@@ -128,6 +146,24 @@ async function addVM(vms) {
         // console.log("VM saved:", response.data);
     } catch (error) {
         console.error("Error Write Log:", error);
+    }
+}
+
+//!! FUNCTION BACKEND (GET VIRTUAL MACHINES)
+async function GetVirtualMachines() {
+  const endpoint = '/vmmanager/vms';
+  try {
+    const response = await BackendAPI.get(endpoint, {
+      headers: {
+        'Content-Type': 'application/json', 
+      },
+    });
+
+  //   console.log(response.data); // untuk cek response
+    return response.data;
+  } catch (error) {
+    console.error("Error in GetDeploymentLog:", error);
+    return { stat: 'failed', data: [] }; // fallback
     }
 }
 
@@ -409,7 +445,7 @@ function VMmanager (){
                 if (response.data.status === "success") {
                     setCards([])
                     await delay(5000);
-                    writeLog("Start creating cluster", "Start")
+                    writeLog("Start Build Virtual Machines", "Start")
                     await TerrafromCreateMain(response.data.newResources); // Panggil API selanjutnya
                     addVM(newVmsData)
                     await writeLog("Virtual Machines Finished", "Finished")
@@ -426,24 +462,6 @@ function VMmanager (){
         
     };
 
-    //! === BACKEND API - GET LOG ===
-    // AMBIL VM MANAGER LOG
-    async function GetDeploymentLog() {
-        const endpoint = '/vmmanager/data';
-        try {
-          const response = await BackendAPI.get(endpoint, {
-            headers: {
-              'Content-Type': 'application/json', 
-            },
-          });
-      
-        //   console.log(response.data); // untuk cek response
-          return response.data;
-        } catch (error) {
-          console.error("Error in GetDeploymentLog:", error);
-          return { stat: 'failed', data: [] }; // fallback
-        }
-    }
     useEffect(() => {
         const interval = setInterval(() => {
           GetDeploymentLog().then((result) => {
@@ -456,24 +474,6 @@ function VMmanager (){
         return () => clearInterval(interval); // Bersihkan interval saat unmount
     }, []);
 
-    //! === BACKEND API - GET VM ===
-    // AMBIL VMs
-    async function GetVirtualMachines() {
-        const endpoint = '/vmmanager/vms';
-        try {
-          const response = await BackendAPI.get(endpoint, {
-            headers: {
-              'Content-Type': 'application/json', 
-            },
-          });
-      
-        //   console.log(response.data); // untuk cek response
-          return response.data;
-        } catch (error) {
-          console.error("Error in GetDeploymentLog:", error);
-          return { stat: 'failed', data: [] }; // fallback
-        }
-    }
     useEffect(() => {
         const interval = setInterval(() => {
             GetVirtualMachines().then((result) => {
@@ -522,7 +522,7 @@ function VMmanager (){
           {/* button */}
           <div className="d-flex justify-content-center" style={{marginTop:".2rem",marginBottom:".5rem"}}>
             <button type="submit" className="btn btn-primary ms-3" style={{ backgroundColor: "#77CDFF", color: "black", fontWeight:"bold", border:"2px solid black" }}>
-                Build Kubernetes Cluster
+                Build Virtual Machines
             </button>
           </div>
             {errorMessages.length > 0 && (
@@ -744,63 +744,64 @@ function VMmanager (){
                     }}
                 >
                     <div className="card-body">
-                        <div className="d-flex align-items-center mb-2">
-                            <h5 className="card-title mb-0">{displayTitle}</h5>
-                            <img
-                            src={logo}
-                            alt="OS Logo"
-                            style={{
-                                width: "30px",
-                                height: "30px",
-                                marginLeft: "0.5rem",
-                            }}
-                            />
-                            
-                        </div>
-                    
-                    <p className="card-text" style={{marginBottom:".3rem"}}>
-                        <strong className="vm-label">OS:</strong> {vm.os}
-                    </p>
-                    <p className="card-text" style={{marginBottom:".3rem"}}>
-                        <strong className="vm-label">Name:</strong> {vm.name}
-                    </p>
-                    <p className="card-text" style={{marginBottom:".3rem"}}>
-                        <strong className="vm-label">IPv4 Address:</strong> {vm.ipv4_address}
-                    </p>
-                    {/* <p className="card-text">
-                        <strong>Netmask:</strong> {vm.ipv4_netmask}
-                    </p>
-                    <p className="card-text">
-                        <strong>Gateway:</strong> {vm.ipv4_gateway}
-                    </p>
-                    <p className="card-text">
-                        <strong>DNS Server List:</strong> {vm.dns_server_list.join(", ")}
-                    </p> */}
-                    {vm.os.toLowerCase() === "ubuntu" ? (
-                        <>
-                        <p className="card-text" style={{marginBottom:".3rem"}}>
-                            <strong className="vm-label">Host Name:</strong> {vm.host_name}
-                        </p>
-                        <p className="card-text" style={{marginBottom:".3rem"}}>
-                            <strong className="vm-label">Domain:</strong> {vm.domain}
-                        </p>
-                        </>
-                    ) : (
-                        <>
-                        <p className="card-text" style={{marginBottom:"2rem"}}>
-                            <strong className="vm-label">Computer Name:</strong> {vm.computer_name}
-                        </p>
-                        </>
-                    )}
-                    <div className="d-flex justify-content-center">
-                        <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => handleDeleteVM(vm.title,displayTitle)}
-                        >
-                        Delete
-                        </button>
-                    </div>
+                      <div className="d-flex align-items-center mb-2">
+                          <h5 className="card-title mb-0">{displayTitle}</h5>
+                          <img
+                          src={logo}
+                          alt="OS Logo"
+                          style={{
+                              width: "30px",
+                              height: "30px",
+                              marginLeft: "0.5rem",
+                          }}
+                          />
+                          
+                      </div>
+                  
+                      <p className="card-text" style={{marginBottom:".3rem"}}>
+                          <strong className="vm-label">OS:</strong> {vm.os}
+                      </p>
+                      <p className="card-text" style={{marginBottom:".3rem"}}>
+                          <strong className="vm-label">Name:</strong> {vm.name}
+                      </p>
+                      <p className="card-text" style={{marginBottom:".3rem"}}>
+                          <strong className="vm-label">IPv4 Address:</strong> {vm.ipv4_address}
+                      </p>
+                      {/* <p className="card-text">
+                          <strong>Netmask:</strong> {vm.ipv4_netmask}
+                      </p>
+                      <p className="card-text">
+                          <strong>Gateway:</strong> {vm.ipv4_gateway}
+                      </p>
+                      <p className="card-text">
+                          <strong>DNS Server List:</strong> {vm.dns_server_list.join(", ")}
+                      </p> */}
+                      {vm.os.toLowerCase() === "ubuntu" ? (
+                          <>
+                          <p className="card-text" style={{marginBottom:".3rem"}}>
+                              <strong className="vm-label">Host Name:</strong> {vm.host_name}
+                          </p>
+                          <p className="card-text" style={{marginBottom:".3rem"}}>
+                              <strong className="vm-label">Domain:</strong> {vm.domain}
+                          </p>
+                          </>
+                      ) : (
+                          <>
+                          <p className="card-text" style={{marginBottom:"2rem"}}>
+                              <strong className="vm-label">Computer Name:</strong> {vm.computer_name}
+                          </p>
+                          </>
+                      )}
+                      <div className="d-flex justify-content-center">
+                          <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => handleDeleteVM(vm.title, displayTitle)}
+                            disabled={vm.role !== null}
+                          >
+                            Delete
+                          </button>
+                      </div>
                     </div>
                 </div>
                 );

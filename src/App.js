@@ -17,6 +17,7 @@ import Sync from "./Pages/Sync";
 import None from "./Pages/Default"
 import BuildK8s from "./Pages/Buildk8s"
 import VMManager from "./Pages/VMmanager"
+import K8sManager from "./Pages/K8smanager"
 
 //!! MODAL UPLOAD
 //!! Terraform upload config (1)
@@ -857,6 +858,9 @@ function App() {
               <li className="nav-item" style={{fontSize:"1.5rem", }}>
                 <a className="nav-link active" aria-current="page"  href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("vmManager")}>VM Manager</a>
               </li>
+              <li className="nav-item" style={{fontSize:"1.5rem", }}>
+                <a className="nav-link active" aria-current="page"  href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("k8sManager")}>K8s Manager</a>
+              </li>
               {/* <li className="nav-item" style={{fontSize:"1.5rem", }}>
                 <a className="nav-link active" aria-current="page" href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("buildK8s")}>Build K8s</a>
               </li> */}
@@ -880,8 +884,9 @@ function App() {
           {activeMenu === "none" && <None />}
           {activeMenu === "monitoring" && <Monitoring />}
           {activeMenu === "sync" && <Sync />}
-          {/* {activeMenu === "buildK8s" && <BuildK8s />} */}
+          {/* {activeMenu === "k8sManager" && <BuildK8s />} */}
           {activeMenu === "vmManager" && <VMManager />}
+          {activeMenu === "k8sManager" && <K8sManager />}
         </div>
     </>
   )
