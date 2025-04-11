@@ -173,7 +173,7 @@ async function TerrafromCreateMain(newResources){
     const TMainAdd = "/terraform/tmain/add"
   
     try {
-        writeLog("Create Configuration File", "Process")
+        await writeLog("Create Configuration File", "Process")
     //   console.log("==Start== create Main.tf "+ new Date());
       const response = await TerraformAPI.post(
         TMainAdd,
@@ -196,7 +196,7 @@ async function TerraformCommandApply(newResources){
     const CommandApply = "/terraform/command/apply"
   
     try {
-        writeLog("Build and setup Virtual Machines", "Process")
+      await writeLog("Build and setup Virtual Machines", "Process")
     //   console.log("==Start== apply main.tf "+ new Date());
       const response = await TerraformAPI.post(
         CommandApply,
@@ -445,14 +445,14 @@ function VMmanager (){
                 if (response.data.status === "success") {
                     setCards([])
                     await delay(5000);
-                    writeLog("Start Build Virtual Machines", "Start")
+                    await writeLog("Start Build Virtual Machines", "Start")
                     await TerrafromCreateMain(response.data.newResources); // Panggil API selanjutnya
                     addVM(newVmsData)
                     await writeLog("Virtual Machines Finished", "Finished")
                     setFormData(getInitialFormData());
                 
                 }else{
-                    writeLog("Format Data Error", "Error")
+                  await writeLog("Format Data Error", "Error")
                 }
                 
             } catch (error) {
@@ -487,13 +487,13 @@ function VMmanager (){
     }, []);
 
     const handleDeleteVM = async(vmTitle,displayTitle)=>{
-        writeLog("Start delete VM "+ displayTitle, "Start")
+        await writeLog("Start destroy "+ displayTitle, "Start")
         TerrafromDeleteVm_config(vmTitle)
         await delay(2000);
         await TerrafromDeleteVm_command(vmTitle)
         await delay(5000);
         await deleteVM(vmTitle)
-        await writeLog("Virtual Machine "+displayTitle+" successfully deleted", "Finished")
+        await writeLog(+displayTitle+" successfully destroy", "Finished")
     }
 
     return(
@@ -798,6 +798,7 @@ function VMmanager (){
                             className="btn btn-danger"
                             onClick={() => handleDeleteVM(vm.title, displayTitle)}
                             disabled={vm.role !== null}
+                            style={{ color: "black", background:"#F95454" }}
                           >
                             Delete
                           </button>

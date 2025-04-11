@@ -248,17 +248,17 @@ async function InventoryProcess(infoHost){
         console.log('star CP process '+ new Date())
         writeLog('Set up Control Plane','Process') //DISINI_LOG 3
         await DellInventory1()
-        await delay(5000)
+        await delay(10000)
         await AddInventory1(CP_IPs);
-        await delay(5000)
+        await delay(10000)
         await TestConnectionCP();
-        await delay(8000)
+        await delay(10000)
         writeLog('Install Docker on Control Plane','Process') //DISINI_LOG 3
         await InstallDockerCP();
-        await delay(8000)
+        await delay(10000)
         writeLog('Install Kubernetes on Control Plane','Process')
         await InstallK8sCP();
-        await delay(8000)
+        await delay(10000)
         await InitAsCP();
         console.log('end CP process '+ new Date())
         writeLog('Control Plane setup completed','Process') //DISINI_LOG 4
@@ -267,14 +267,14 @@ async function InventoryProcess(infoHost){
         console.log('star WN-U process '+ new Date())
         writeLog('Set up Ubuntu Worker Node','Process') //DISINI_LOG 5
         await DellInventory2()
-        await delay(8000)
+        await delay(10000)
         await AddInventory2(Wn_ubt_IPs)
-        await delay(8000)
+        await delay(10000)
         await TestConnectionWnU()
-        await delay(8000)
+        await delay(10000)
         writeLog('Install Docker on  Ubuntu Worker Node','Process') //DISINI_LOG 5
         await InstallDockerWnU()
-        await delay(8000)
+        await delay(10000)
         writeLog('Install Kubernetes on  Ubuntu Worker Node','Process') //DISINI_LOG 5
         await InstallK8sWnU()
         console.log('end WN-U process '+ new Date())
@@ -284,14 +284,14 @@ async function InventoryProcess(infoHost){
         console.log('star WN-W process '+ new Date())
         writeLog('Set up Windows Worker Node','Process') //DISINI_LOG 7
         await DellInventory3()
-        await delay(8000)
+        await delay(10000)
         await AddInventory3(Wn_win_IPs)
-        await delay(8000)
+        await delay(10000)
         await TestConnectionWnW()
-        await delay(8000)
+        await delay(10000)
         writeLog('Install Docker on Windows Worker Node','Process') //DISINI_LOG 5
         await InstallDockerWnW()
-        await delay(8000)
+        await delay(10000)
         writeLog('Install Kubernetes on Windows Worker Node','Process') //DISINI_LOG 5
         await InstallK8sWnW()
         console.log('end WN-W process '+ new Date())
@@ -374,19 +374,16 @@ async function InstallDockerCP(){
     const installDocker = '/ansible/playbook/cp/i-dkr'
 
     try {
-        console.log('==Start== Install Docker (8) '+ new Date())
-        const response = await AnsibleAPI.get(
-        installDocker, //! endponint
-        // JSON.stringify({ip}), //! data diubah jadi bentuk json object
-        {
-            headers: {
-            'Content-Type': 'application/json', //! data yang dikirim bentuk json
-            },
-        }
-        )
-        console.log('==End== Install Docker (8) '+ new Date())
+        console.log('==Start== Install Docker (8) ' + new Date());
+        const response = await AnsibleAPI.get(installDocker, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log('==End== Install Docker (8) ' + new Date());
+        return response.data;
     } catch (error) {
-        console.error("Error in AnsibleAddKey:", error);
+        console.error("Error in InstallDockerCP:", error);
     }
 }
   
@@ -812,25 +809,28 @@ function K8smanager(){
         // Cari VM dengan role "ControlPlane"
         const cp = dataArray.find(item => item.role === "ControlPlane");
         if (!cp) {
-          console.error("ControlPlane tidak ditemukan!");
-          return null;
+            console.error("ControlPlane tidak ditemukan!");
+            return null;
         }
         
+        // Ubah title control plane agar underscore diganti spasi
         const cpName = cp.title.replace(/_/g, " ");
         
+        // Filter worker nodes hanya dengan role "WorkerNode"
         const workers = dataArray.filter(item => item.role === "WorkerNode");
         
+        // Map children dengan menggunakan title worker (dengan underscore diganti spasi)
         const children = workers.map((worker, index) => ({
-          role: `Worker Node ${index + 1}`,
-          name: `Virtual Machine ${index + 1}`
+            role: `Worker Node ${index + 1}`,
+            name: worker.title.replace(/_/g, " ")
         }));
         
         // Kembalikan objek cluster baru
         return {
-          role: cp.role,               
-          name: cpName,                
-          children: children,          // Array worker node
-          clusterName: "cluster-"+(k8scluster.length+1)     // misalnya "cluster-1"
+            role: cp.role, // "ControlPlane"
+            name: cpName,  // misalnya "Virtual Machine 1"
+            children: children, // hanya VM dengan role WorkerNode
+            clusterName: "cluster-"+(k8scluster.length+1)  
         };
       }
 
@@ -883,7 +883,7 @@ function K8smanager(){
 
             <div className="d-flex justify-content-center" style={{marginTop:".2rem",marginBottom:".5rem"}}>
                 <button className="btn" style={{ backgroundColor: "#AEEA94", color: "black", fontWeight:"bold", border:"2px solid black"}} onClick={addWorkerNode}>
-                    Add WorkerNode
+                    Add Worker Node
                 </button>
             </div>
  
