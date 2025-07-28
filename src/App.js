@@ -13,7 +13,8 @@ import { TerraformAPI, AnsibleAPI, BackendAPI } from './axios';
 
 // Page
 import Monitoring from "./Pages/Monitoring";
-import Sync from "./Pages/Sync";
+import Appmanager from "./Pages/Appmanager";
+import Appcontianer from './Pages/Appcontainer';
 import None from "./Pages/Default"
 import BuildK8s from "./Pages/Buildk8s"
 import VMManager from "./Pages/VMmanager"
@@ -861,6 +862,9 @@ function App() {
               <li className="nav-item" style={{fontSize:"1.5rem", }}>
                 <a className="nav-link active" aria-current="page"  href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("k8sManager")}>K8s Manager</a>
               </li>
+              <li className="nav-item" style={{fontSize:"1.5rem", }}>
+                <a className="nav-link active" aria-current="page"  href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("Appcontainer")}>App Container</a>
+              </li>
               {/* <li className="nav-item" style={{fontSize:"1.5rem", }}>
                 <a className="nav-link active" aria-current="page" href='#' style={{fontWeight:"bold", fontSize:"1.2rem"}} onClick={() => setActiveMenu("buildK8s")}>Build K8s</a>
               </li> */}
@@ -883,7 +887,7 @@ function App() {
           {/* Render konten tergantung activeMenu */}
           {activeMenu === "none" && <None />}
           {activeMenu === "monitoring" && <Monitoring />}
-          {activeMenu === "sync" && <Sync />}
+          {activeMenu === "Appcontainer" && <Appcontianer />}
           {/* {activeMenu === "k8sManager" && <BuildK8s />} */}
           {activeMenu === "vmManager" && <VMManager />}
           {activeMenu === "k8sManager" && <K8sManager />}

@@ -1,315 +1,378 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import '../../App.css';
 
+import {BackendAPI } from '../../axios';
+
+function transformData(flatData) {
+    const cardsByIndex = {};
+  
+    // Mengelompokkan data berdasarkan index card
+    Object.keys(flatData).forEach(key => {
+      // Ekstrak index dan property menggunakan regex
+      const match = key.match(/^card\[(\d+)\]\.(.+)$/);
+      if (match) {
+        const index = match[1];
+        const prop = match[2];
+        if (!cardsByIndex[index]) {
+          cardsByIndex[index] = {};
+        }
+        cardsByIndex[index][prop] = flatData[key];
+      }
+    });
+  
+    const result = {};
+  
+    // Proses setiap card yang telah dikelompokkan
+    Object.keys(cardsByIndex).forEach(index => {
+      const card = cardsByIndex[index];
+      const raw_type = card.type;
+      if (!raw_type) return; 
+      if(!card.imageBase || !card.port)return
+
+      const output = {};
+  
+      // Salin properti yang umum (name, ipv4, dns, dll.)
+      if (card.imageBase) {
+        output.imageBase = card.imageBase;
+      }
+      if (card.port) {
+        // Ubah string menjadi array dengan memisahkan berdasarkan koma
+        output.port = card.port.split(",").map(s => s.trim());
+      }
+  
+      // Masukkan hasil transformasi ke objek result dengan key berupa title
+    //   const title = raw_title.replaceAll(" ", "_");
+      result[raw_type] = output;
+    });
+  
+    return result;
+}
+
+function checkDuplicateCardTypes(data) {
+    // Ambil tipe dari setiap card berdasarkan key "card[i].type"
+    const cardTypes = {};
+    Object.keys(data).forEach(key => {
+      const match = key.match(/^card\[(\d+)\]\.type$/);
+      if (match) {
+        const index = match[1];
+        cardTypes[index] = data[key];
+      }
+    });
+  
+    // Hitung berapa kali setiap tipe muncul
+    const typeCounts = {};
+    for (const index in cardTypes) {
+      const type = cardTypes[index];
+      if (!typeCounts[type]) {
+        typeCounts[type] = [];
+      }
+      typeCounts[type].push(index);
+    }
+  
+    // Filter tipe yang muncul lebih dari sekali
+    const duplicates = [];
+    for (const type in typeCounts) {
+      if (typeCounts[type].length > 1) {
+        duplicates.push('Duplicate found in '+type)
+      }
+    }
+
+    return duplicates;
+}
+
+function uploadDataDocker(data){
+
+}
+
+//!! FUNCTION BACKEND (GET logs)
+async function GetLogs() {
+    const endpoint = '/appmanager/logs';
+    try {
+      const response = await BackendAPI.get(endpoint, {
+        headers: {
+          'Content-Type': 'application/json', 
+        },
+      });
+  
+      return response.data;
+    } catch (error) {
+      console.error("Error in GetDeploymentLog:", error);
+      return { stat: 'failed', data: [] }; // fallback
+    }
+}
+
+//!! FUNCTION BACKEND (GET last Commit)
+async function GetLastCommit() {
+    const endpoint = '/appmanager/git-log';
+    try {
+      const response = await BackendAPI.get(endpoint, {
+        headers: {
+          'Content-Type': 'application/json', 
+        },
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error("Error in GetDeploymentLog:", error);
+      return { stat: 'failed', data: [] }; // fallback
+    }
+}
+
 function IPM (){
-    // Cek upload DOCKERFILE
-    const [selectedFile, setSelectedFile] = useState(null);
-
-    // State untuk masing-masing Dockerfile
-    const [dataProcessingDocker, setDataProcessingDocker] = useState(null);
-    const [guiDocker, setGuiDocker] = useState(null);
-    const [parserServiceDocker, setParserServiceDocker] = useState(null);
-    const [serviceDocker, setServiceDocker] = useState(null);
-    const [tokenDocker, setTokenDocker] = useState(null);
-
-    // State untuk masing-masing Zip File
-    const [dataProcessingFile, setDataProcessingFile] = useState(null);
-    const [guiFile, setGuiFile] = useState(null);
-    const [parserServiceFile, setParserServiceFile] = useState(null);
-    const [serviceFile, setServiceFile] = useState(null);
-    const [tokenFile, setTokenFile] = useState(null);
-    //     if (!dataProcessingDocker && !guiDocker && !parserServiceDocker &&
-    //         !serviceDocker && !tokenDocker
-    //     ) {
-    //       alert("Pastikan kedua file telah dipilih!");
-    //       return;
-    //     }
-
-    //     if (!dataProcessingFile && !guiFile){
-    //         alert("Pastikan Zip file telah dipilih!");
-    //       return;
-    //     }
-    //     // Buat FormData dan tambahkan file sesuai key (yang akan digunakan server)
-    //     const formData = new FormData();
-    //     // DOCKERFILE
-    //     formData.append("DataProcessingDocker", dataProcessingDocker);
-    //     formData.append("GUIDocker", guiDocker);
-    //     formData.append("ParserServiceDocker", parserServiceDocker);
-    //     formData.append("ServiceDocker", serviceDocker);
-    //     formData.append("TokenDocker", tokenDocker);
-    
-    //     try {
-    //       const response = await fetch("http://localhost:8003/upload/upload", {
-    //         method: "POST",
-    //         body: formData,
-    //       });
-    //       if (response.ok) {
-    //         alert("File berhasil diupload dan disimpan ke server.");
-    //       } else {
-    //         alert("Terjadi kesalahan saat upload file.");
-    //       }
-    //     } catch (error) {
-    //       console.error(error);
-    //       alert("Terjadi error: " + error.message);
-    //     }
-    // };
-
-    // // Zip File
-    // const handleFileChange2 = (e) => {
-    //     const file = e.target.files[0];
-
-    //     if (e.target.id === "DataProcessingFile") {
-    //         setDataProcessingFile(file);
-    //     } else if (e.target.id === "GUIFile") {
-    //         setGuiFile(file);
-    //     }else if (e.target.id === "ParserFile") {
-    //         setParserServiceFile(file);
-    //     }else if (e.target.id === "ServiceFile") {
-    //         setServiceFile(file);
-    //     }else if (e.target.id === "TokenFile") {
-    //         setTokenFile(file);
-    //     }
-    // };
-
-    // const handleUpload2 = async () => {
-    //     const formData2 = new FormData();
-    //     // DOCKERFILE
-    //     formData2.append("DataProcessingFile", dataProcessingFile);
-    //     formData2.append("GUIFile", guiFile);
-    //     formData2.append("ParserFile", parserServiceFile);
-    //     formData2.append("ServiceFile", serviceFile);
-    //     formData2.append("TokenFile", tokenFile);
-
-
-    //     try {
-    //       const response = await fetch("http://localhost:8003/upload/upload2", {
-    //         method: "POST",
-    //         body: formData2,
-    //       });
-    //       if (response.ok) {
-    //         alert("File berhasil diupload dan disimpan ke server.");
-    //       } else {
-    //         alert("Terjadi kesalahan saat upload file.");
-    //       }
-    //     } catch (error) {
-    //       console.error(error);
-    //       alert("Terjadi error: " + error.message);
-    //     }
-    // };
-    
-    // Untuk input Dockerfile-runtime
-    
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const id = e.target.id;
-        
-        // Untuk input Dockerfile (harus bernama "Dockerfile-runtime")
-        if (id === "DataProcessingDocker" || id === "GUIDocker" || id === "ParserServiceDocker" || id === "ServiceDocker" || id === "TokenDocker" ) {
-          if (file.name !== "Dockerfile-runtime") {
-            alert("Hanya file dengan nama 'Dockerfile-runtime' yang diperbolehkan!");
-            e.target.value = null;
-            return;
-          }
-          if (id === "DataProcessingDocker") {
-            setDataProcessingDocker(file);
-          } else if(id === "GUIDocker") {
-            setGuiDocker(file);
-          } else if(id === "ParserServiceDocker") {
-            setParserServiceDocker(file);
-          } else if(id === "ServiceDocker") {
-            setServiceDocker(file);
-          } else if(id === "TokenDocker") {
-            setTokenDocker(file);
-          }
-        }
-        // Untuk input ZIP
-        else if (id === "DataProcessingFile" || id === "GUIFile" || id === "ParserFile" || id === "ServiceFile" || id === "TokenFile") {
-          if (!file.name.toLowerCase().endsWith(".zip")) {
-            alert("Hanya file ZIP yang diperbolehkan!");
-            e.target.value = null;
-            return;
-          }
-          if (id === "DataProcessingFile") {
-            setDataProcessingFile(file);
-          } else if(id === "GUIFile") {
-            setGuiFile(file);
-          } else if(id === "ParserFile") {
-            setParserServiceFile(file);
-          } else if(id === "ServiceFile") {
-            setServiceFile(file);
-          } else if(id === "TokenFile") {
-            setTokenFile(file);
-          }
-        }
+    const [logs, setLogs] = useState([]);
+    const [cards, setCards] = useState([]);
+    const [errorMessages, setErrorMessages] = useState([]);
+    const dataDockerEndpoint = '/appmanager/generatedf'
+    const getInitialFormData = () => {
+        const initialData = {};
+        cards.forEach((card, index) => {
+          initialData[`card[${index}].title`] = card.title;
+        });
+        return initialData;
     };
-    const handleUpload = async () => {
-        // Validasi: pastikan kedua file untuk masing-masing grup telah dipilih
-    
-        // Gabungkan semua file ke dalam satu FormData
-        const formData = new FormData();
-        if (dataProcessingDocker) formData.append("DataProcessingDocker", dataProcessingDocker);
-        if (dataProcessingFile) formData.append("DataProcessingFile", dataProcessingFile);
 
-        if (guiDocker) formData.append("GUIDocker", guiDocker);
-        if (guiFile) formData.append("GUIFile", guiFile);
+    const addCard = () => {
+        const newCardIndex = cards.length ;
+        const newCard = {
+          title: `DockerFile ${newCardIndex+1}`
+        };
+        setCards([...cards, newCard]);
+    };
 
-        if (parserServiceDocker) formData.append("ParserServiceDocker", parserServiceDocker);
-        if (parserServiceFile) formData.append("ParserFile", parserServiceFile);
-
-        if (serviceDocker) formData.append("ServiceDocker", serviceDocker);
-        if (serviceFile) formData.append("ServiceFile", serviceFile);
-
-        if (tokenDocker) formData.append("TokenDocker", tokenDocker);
-        if (tokenFile) formData.append("TokenFile", tokenFile);
-    
-        try {
-          const response = await fetch("http://localhost:8003/upload/upload", {
-            method: "POST",
-            body: formData,
+    const deleteCardByIndex = (indexToDelete) => {
+        setFormData((prevData) => {
+          const newData = {};
+          Object.keys(prevData).forEach((key) => {
+            // Jika key tidak dimulai dengan `card[2].`, masukkan ke newData
+            if (!key.startsWith(`card[${indexToDelete}].`)) {
+              newData[key] = prevData[key];
+            }
           });
-          if (response.ok) {
-            alert("File berhasil diupload dan diproses di server.");
-          } else {
-            alert("Terjadi kesalahan saat upload file.");
-          }
-        } catch (error) {
-          console.error(error);
-          alert("Terjadi error: " + error.message);
-        }
+          return newData;
+        });
     };
+
+    const [formData, setFormData] = useState(getInitialFormData);
+    const [message,setMessage] = useState('')
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+          ...prevData,
+          [name]: value,
+        }));
+    };
+
+    const handleDelete = (indexToDelete) => {
+        deleteCardByIndex(indexToDelete)
+
+        const newCards = cards.filter((_, index) => index !== indexToDelete);
+        setCards(newCards);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const duplicateErrors = checkDuplicateCardTypes(formData)
+        if (duplicateErrors.length > 0) {
+            setErrorMessages(duplicateErrors);
+            return;
+          } else {
+            setErrorMessages([]); // reset error jika tidak ada duplikasi
+            const dataDF = transformData(formData);
+            try {
+                const response = await BackendAPI.post(
+                    dataDockerEndpoint, //endpoint
+                    { dataDF, message },
+                    { headers: { "Content-Type": "application/json" } }
+                );    
+                
+                if (response.data.stat === "success") {
+                    setCards([])
+                    setMessage('')
+                    setFormData(getInitialFormData());
+                }
+                
+            } catch (error) {
+                console.error("Error in handleSubmit:", error);
+            }
+          }
+    };
+
+    //ini yang ambil commit terakhir
+    useEffect(() => {
+            const interval = setInterval(() => {
+                GetLastCommit()
+                GetLogs().then((result) => {
+                if (result.stat === 'success') {
+                  setLogs(result.data);
+                }
+              });
+            }, 10000); // Cek setiap 5 detik
+          
+            return () => clearInterval(interval); // Bersihkan interval saat unmount
+    }, []);
 
     return(
         <>
-            {/* DATA PROCESSING */}
-            <div className='row my-2 justify-content-center'>
-                    <div className="col-md-6 d-flex justify-content-center align-items-center">
-                        <div className='sub_title col-md-3 mb-3'>
-                            Dockerfile Data Processing
+            <div className="d-flex justify-content-center" style={{marginTop:".2rem",marginBottom:".5rem"}}>
+                <button className="btn" onClick={addCard} style={{ backgroundColor: "#AEEA94", color: "black", fontWeight:"bold", border:"2px solid black" }}>
+                    Add New DockerFile
+                </button>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+                {/* button */}
+                <div className="d-flex justify-content-center" style={{marginTop:".2rem",marginBottom:".5rem"}}>
+                    <button type="submit" className="btn btn-primary ms-3" style={{ backgroundColor: "#77CDFF", color: "black", fontWeight:"bold", border:"2px solid black" }}>
+                        Containerize Application
+                    </button>
+                </div>
+                {errorMessages.length > 0 && (
+                    <div className="alert alert-danger" role="alert">
+                    <strong>INFO ERROR</strong>
+                    <ul>
+                        {errorMessages.map((msg, index) => (
+                        <li key={index}>{msg}</li>
+                        ))}
+                    </ul>
+                    </div>
+                )}
+
+                <div
+                    className="card-container"
+                    style={{ display: "flex", flexWrap: "wrap", gap: "1rem", paddingBottom:"1rem" }}
+                >
+                {cards.map((card, index) => (
+                    <div
+                    key={index}
+                    className="card"
+                    style={{
+                    border: "3px solid black",
+                    width:"25rem"
+                    }}
+                    >
+                        <div className="card-body">
+                            <h5 className="card-title">{card.title}</h5>
+
+                            {/* TYPE */}
+                            <div className=" d-flex" style={{marginBottom:".2rem"}}>
+                                <label htmlFor={`input-${index}`} className="form-label nowrap me-2">DockerFile Type</label>
+                                <select
+                                    id={`type-${index}`}
+                                    className="form-select"
+                                    name={`card[${index}].type`}
+                                    value={formData[`card[${index}].type`] || "none"}
+                                    onChange={handleChange}
+                                >
+                                    <option value="none" disabled>Choose...</option>
+                                    <option value="DataProcessing">Data Processing</option>
+                                    <option value="GUI">GUI</option>
+                                    <option value="ParserService">Parser Service</option>
+                                    <option value="Service">Service</option>
+                                    <option value="TokenServer">Token Server</option>
+                                </select>
+                            </div>
+
+                            {/* IMAGE BASE */}
+                            <div className=" d-flex" style={{marginBottom:".2rem"}}>
+                                <label htmlFor={`input-${index}`} className="form-label nowrap me-2">Image Base</label>
+                                <select
+                                    id={`imageBase-${index}`}
+                                    className="form-select"
+                                    name={`card[${index}].imageBase`}
+                                    value={formData[`card[${index}].imageBase`] || "none"}
+                                    onChange={handleChange}
+                                >
+                                    <option value="none" disabled>Choose...</option>
+                                    <option value="mcr.microsoft.com/windows/servercore:1809">Windows Server Core 1809</option>  
+                                </select>
+                            </div>
+
+                            {/* DNS SERVER LISTK */}
+                            <div className="d-flex" style={{marginBottom:".2rem"}}>
+                                <label htmlFor={`input-${index}`} className="form-label nowrap me-2">Port Export</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id={`input-${index}`}
+                                    name={`card[${index}].port`}
+                                    onChange={handleChange}
+                                />
+                            </div>
+
+                            {/* BTN DELETEK */}
+                            <button type="button" className="btn btn-danger" onClick={() => handleDelete(index)} style={{ backgroundColor: "#EF5A6F", color: "black"}}>
+                                Delete
+                            </button>
                         </div>
-                        <div class="input-group mb-3">
-                            <input type="file" class="form-control" id="DataProcessingDocker" onChange={handleFileChange}></input>
-                            <label class="input-group-text" for="DataProcessingDocker">Upload</label>
-                        </div>
                     </div>
-                    <div className="col-md-6 d-flex justify-content-center align-items-center">
-                        <div className='sub_title col-md-3 mb-3'>
-                            Data Processing File
-                        </div>
-                        <div class="input-group mb-3">
-                            <input type="file" class="form-control" id="DataProcessingFile" accept=".zip" onChange={handleFileChange} ></input>
-                            <label class="input-group-text" for="DataProcessingFile">Upload</label>
-                        </div>
-                    </div>
-            </div>
-
-            {/* GUI */}
-            <div className='row my-2 justify-content-center'>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3'>
-                        Dockerfile GUI
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="GUIDocker" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="GUIDocker">Upload</label>
-                    </div>
+                ))}
                 </div>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3'>
-                        GUI File
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="GUIFile" accept=".zip" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="GUIFile">Upload</label>
-                    </div>
+                {cards.length > 0 && (
+                    <div className="mb-3 mx-auto" style={{ width: "30%" }}>
+                    <label htmlFor="exampleFormControlTextarea1" className="form-label d-block text-center">Change Log</label>
+                    <textarea
+                      style={{ border: "3px solid black", textAlign: "center", fontSize:"20px" }}
+                      className="form-control"
+                      id="exampleFormControlTextarea1"
+                      rows="3"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                    ></textarea>
+                  </div>
+                )}
+            </form>
+
+            <hr/>
+            {/* HISTORY */}
+            <div style={{ textAlign: "center" }}>
+                <div
+                    style={{
+                    display: "inline-block",
+                    fontSize: "1.3rem",
+                    background: "#E7FBB4",
+                    padding: "0.5rem",
+                    borderRadius: "10px",
+                    fontWeight:"bold"
+                    }}
+                >
+                    IPM Containerized Log Activity
                 </div>
             </div>
 
-            {/* Parser Service */}
-            <div className='row my-2 justify-content-center'>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3'>
-                        Dockerfile Parser Service
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="ParserServiceDocker" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="ParserServiceDocker">Upload</label>
-                    </div>
-                </div>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3'>
-                        Parser Service File
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="ParserFile" accept=".zip" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="ParserFile">Upload</label>
-                    </div>
-                </div>
+            <div className="d-flex justify-content-center" style={{marginTop:"1rem",marginBottom:"2rem"}}>
+                <table className="min-w-full table-brdr text-sm text-center" >
+                    <thead className="bg-gray-200">
+                    <tr>
+                        <th className="px-4 py-2 table-brdr">Message</th>
+                        <th className="px-4 py-2 table-brdr">Status</th>
+                        <th className="px-4 py-2 table-brdr">Datetime</th>
+                    </tr>
+                    </thead>
+                    <tbody className="table-brdr">
+                    {logs.map((log) => (
+                        <tr
+                        key={log._id}
+                        className={
+                        log.status?.toLowerCase() === "start"
+                            ? "row-start"
+                            : log.status?.toLowerCase() === "process"
+                            ? "row-process"
+                            : log.status?.toLowerCase() === "finished"
+                            ? "row-finished"
+                            : log.status?.toLowerCase() === "error"
+                            ? "row-error"
+                            :""
+                        }
+                    >
+                        <td className="px-4 py-2 table-brdr">{log.msg}</td>
+                        <td className="px-4 py-2 table-brdr">{log.sts}</td>
+                        <td className="px-4 py-2 table-brdr">{log.date}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
             </div>
-
-            {/* Service */}
-            <div className='row my-2 justify-content-center'>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3' >
-                        Dockerfile Service
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="ServiceDocker" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="ServiceDocker">Upload</label>
-                    </div>
-                </div>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3'>
-                        Service File
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="ServiceFile" accept=".zip" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="ServiceFile">Upload</label>
-                    </div>
-                </div>
-            </div>
-
-            {/* Token Server */}
-            <div className='row my-2 justify-content-center'>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3'>
-                        Dockerfile Token Server
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="TokenDocker" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="TokenDocker">Upload</label>
-                    </div>
-                </div>
-                <div className="col-md-6 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-3 mb-3'>
-                        Token Server File
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="file" class="form-control" id="TokenFile" accept=".zip" onChange={handleFileChange}></input>
-                        <label class="input-group-text" for="TokenFile">Upload</label>
-                    </div>
-                </div>
-            </div>
-
-            <hr className='hrborder2'/>
-
-            {/* Message */}
-            <div className='row my-2'>
-                <div className="col-md-12 d-flex justify-content-center align-items-center">
-                    <div className='sub_title col-md-1 mb-3'>
-                        Message sync
-                    </div>
-                    <div class="input-group">
-                        <textarea class="form-control" aria-label="With textarea"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div className='row my-2'>
-                <div className=" d-flex justify-content-center align-items-center">
-                    <button type="button" class="btn btn-success" onClick={handleUpload}>Sync</button>
-                </div>
-            </div>
-            
         </>
     )
 }
